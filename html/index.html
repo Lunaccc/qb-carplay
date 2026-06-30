@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div id="cp-root" class="hidden">
+        <div class="cp-tablet wp-aurora">
+            <!-- ===== Üst durum cubugu ===== -->
+            <div class="cp-status">
+                <div class="cp-status-l">
+                    <span id="cpClock">--:--</span>
+                    <span class="cp-veh"><span class="dot"></span><span id="cpVehName">Araç</span></span>
+                </div>
+                <div class="cp-status-r">
+                    <span id="cpAudioMode" class="cp-badge" title="Ses modu">YEREL</span>
+                    <span class="cp-sig"><i></i><i></i><i></i><i></i></span>
+                    <button class="cp-close" id="cpClose" title="Kapat">&times;</button>
+                </div>
+            </div>
+
+            <!-- ===== Govde: sol rail + ekran ===== -->
+            <div class="cp-body">
+                <!-- ---- Sol uygulama dock'u (CarPlay tarzi) ---- -->
+                <aside class="cp-rail">
+                    <div class="rail-apps" id="railApps"></div>
+                    <button class="rail-np" id="railNp" data-empty="1" title="Şimdi çalıyor">
+                        <img id="railNpArt" src="" alt="" />
+                        <span class="rnp-toggle" id="railNpToggle"></span>
+                    </button>
+                </aside>
+
+                <!-- ---- Ekran ---- -->
+                <div class="cp-screen">
+
+                    <!-- ===== HOME / DASHBOARD ===== -->
+                    <section class="cp-view active" id="view-home">
+                        <div class="dash-hero">
+                            <div class="dh-clock" id="homeClock">--:--</div>
+                            <div class="dh-date" id="homeDate">—</div>
+                            <div class="dh-veh" id="homeSub">CarPlay</div>
+                        </div>
+
+                        <div class="dash-cards">
+                            <div class="dash-np" id="homeNp" data-empty="1">
+                                <img class="dnp-art" id="homeNpArt" src="" alt="" />
+                                <div class="dnp-art-ph"></div>
+                                <div class="dnp-meta">
+                                    <div class="dnp-label">ŞİMDİ ÇALIYOR</div>
+                                    <div class="dnp-title" id="homeNpTitle">Çalmıyor</div>
+                                    <div class="dnp-sub" id="homeNpSub">Bir şarkı seç</div>
+                                </div>
+                                <button class="dnp-btn" id="homeNpToggle" aria-label="oynat/duraklat"></button>
+                            </div>
+
+                            <div class="dash-stats">
+                                <div class="ds-tile"><div class="ds-val"><span id="homeSpeed">0</span><small>km/s</small></div><div class="ds-lbl">HIZ</div></div>
+                                <div class="ds-tile"><div class="ds-val"><span id="homeFuel">0</span><small>%</small></div><div class="ds-lbl">YAKIT</div></div>
+                                <div class="ds-tile"><div class="ds-val"><span id="homeGear">0</span></div><div class="ds-lbl">VİTES</div></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== MUSIC (YouTube/Spotify ortak iskelet) ===== -->
+                    <section class="cp-view" id="view-music">
+                        <div class="mn-bg" id="mnBg"></div>
+                        <div class="mn-inner">
+                            <div class="view-head">
+                                <div class="vh-title" id="musicTitle">Müzik</div>
+                                <div class="vh-note" id="musicNote"></div>
+                            </div>
+
+                            <div class="music-now">
+                                <div class="mn-art-wrap">
+                                    <img class="mn-art" id="mnArt" src="" alt="" />
+                                    <div class="mn-art-ph" id="mnArtPh">♪</div>
+                                </div>
+                                <div class="mn-title" id="mnTitle">Çalmıyor</div>
+                                <div class="mn-author" id="mnAuthor">Bir link yapıştırıp çal</div>
+
+                                <div class="mn-seek">
+                                    <span id="mnCur">0:00</span>
+                                    <div class="seek-track" id="seekTrack"><div class="seek-fill" id="seekFill"></div></div>
+                                    <span id="mnDur">0:00</span>
+                                </div>
+
+                                <div class="mn-ctrls">
+                                    <button class="mc-btn" id="mcStop" title="Durdur"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+                                    <button class="mc-btn mc-main" id="mcToggle" title="Oynat/Duraklat"></button>
+                                    <button class="mc-btn" id="mcMute" title="Sessiz"><svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path class="wv" d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button>
+                                </div>
+
+                                <div class="mn-vol">
+                                    <svg viewBox="0 0 24 24" class="vol-ic"><path d="M11 5L6 9H2v6h4l5 4V5z"/></svg>
+                                    <input type="range" id="volSlider" min="0" max="100" value="45" />
+                                </div>
+                            </div>
+
+                            <div class="music-input">
+                                <input type="text" id="ytInput" placeholder="YouTube linkini yapıştır..." spellcheck="false" />
+                                <button id="ytPlay">Çal</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== VEHICLE ===== -->
+                    <section class="cp-view" id="view-vehicle">
+                        <div class="view-head">
+                            <div class="vh-title">Araç</div>
+                            <div class="vh-note" id="vehPlate"></div>
+                        </div>
+                        <div class="dash">
+                            <div class="gauge"><div class="g-val"><span id="gSpeed">0</span><small>km/s</small></div><div class="g-bar"><div class="g-fill" id="gSpeedFill"></div></div><div class="g-lbl">HIZ</div></div>
+                            <div class="gauge"><div class="g-val"><span id="gRpm">0</span><small>%</small></div><div class="g-bar"><div class="g-fill rpm" id="gRpmFill"></div></div><div class="g-lbl">DEVİR</div></div>
+                            <div class="gauge"><div class="g-val"><span id="gFuel">0</span><small>%</small></div><div class="g-bar"><div class="g-fill fuel" id="gFuelFill"></div></div><div class="g-lbl">YAKIT</div></div>
+                            <div class="gauge"><div class="g-val"><span id="gHealth">0</span><small>%</small></div><div class="g-bar"><div class="g-fill hp" id="gHealthFill"></div></div><div class="g-lbl">MOTOR</div></div>
+                        </div>
+                        <div class="ctrl-grid" id="ctrlGrid">
+                            <button class="ctrl" data-act="engine"><span class="ci" data-i="engine"></span><span>Motor</span></button>
+                            <button class="ctrl" data-act="lock"><span class="ci" data-i="lock"></span><span>Kilit</span></button>
+                            <button class="ctrl" data-act="lights"><span class="ci" data-i="lights"></span><span>Farlar</span></button>
+                            <button class="ctrl" data-act="neon"><span class="ci" data-i="neon"></span><span>Neon</span></button>
+                        </div>
+                        <div class="ctrl-row"><div class="cr-label">Camlar</div><div class="cr-btns">
+                            <button class="pill" data-act="window" data-val="0">Sol Ön</button>
+                            <button class="pill" data-act="window" data-val="1">Sağ Ön</button>
+                            <button class="pill" data-act="window" data-val="2">Sol Arka</button>
+                            <button class="pill" data-act="window" data-val="3">Sağ Arka</button>
+                        </div></div>
+                        <div class="ctrl-row"><div class="cr-label">Kapılar</div><div class="cr-btns">
+                            <button class="pill" data-act="door" data-val="0">Sürücü</button>
+                            <button class="pill" data-act="door" data-val="1">Yolcu</button>
+                            <button class="pill" data-act="door" data-val="4">Kaput</button>
+                            <button class="pill" data-act="door" data-val="5">Bagaj</button>
+                        </div></div>
+                        <div class="ctrl-row"><div class="cr-label">Neon Rengi</div><div class="cr-btns" id="neonColors"></div></div>
+                    </section>
+
+                    <!-- ===== NAV ===== -->
+                    <section class="cp-view" id="view-nav">
+                        <div class="view-head"><div class="vh-title">Navigasyon</div><div class="vh-note" id="navZone"></div></div>
+                        <div class="nav-list" id="navList"></div>
+                    </section>
+
+                    <!-- ===== SETTINGS ===== -->
+                    <section class="cp-view" id="view-settings">
+                        <div class="view-head"><div class="vh-title">Ayarlar</div></div>
+                        <div class="set-list">
+                            <div class="set-row"><div class="set-l"><div class="set-t">Ses Seviyesi</div><div class="set-d">Müzik çıkış sesi</div></div><input type="range" id="setVol" min="0" max="100" value="45" /></div>
+                            <div class="set-row"><div class="set-l"><div class="set-t">Duvar Kâğıdı</div><div class="set-d">Arka plan teması</div></div><div class="wp-row" id="wpRow"></div></div>
+                            <div class="set-row"><div class="set-l"><div class="set-t">Ses Modu</div><div class="set-d" id="setModeDesc">—</div></div><span class="cp-badge" id="setModeBadge">YEREL</span></div>
+                            <div class="set-foot luna-credit"><svg viewBox="0 0 24 24"><path d="M15 3a9 9 0 1 0 6.5 15A7.5 7.5 0 0 1 15 3z"/></svg><span>Luna Community · qb-carplay</span></div>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- gizli yerel YouTube oynaticisi (xsound yoksa) - SADECE ses.
+         Ekran disinda ama GERCEK boyutta tutulur; 1px'e kirpilmaz, yoksa CEF sesi askiya alir. -->
+    <div id="yt-player"></div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="app.js"></script>
+</body>
+</html>
