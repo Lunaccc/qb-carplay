@@ -4,6 +4,8 @@
 --  by Tuna
 -- ============================================================
 
+local QBCore       = exports['qb-core']:GetCoreObject()
+
 local isOpen       = false
 local currentVeh   = nil
 local windowsDown  = { false, false, false, false }
@@ -27,6 +29,15 @@ end
 
 local function urlencode(s)
     return (s:gsub("[^%w%-_%.~]", function(c) return string.format("%%%02X", string.byte(c)) end))
+end
+
+-- HTTP GET'i server'a yaptirir (PerformHttpRequest yalnizca server'da var).
+-- Server tarafi host whitelist ile dogrular (SSRF kalkani).
+local function httpGet(url, headers, cb)
+    QBCore.Functions.TriggerCallback('qb-carplay:server:httpGet', function(res)
+        res = res or {}
+        cb(res.code or 0, res.body)
+    end, url, headers or {})
 end
 
 local function vehName(veh)
@@ -234,13 +245,13 @@ end
 -- YouTube'da ilk sonucu bul (API'siz; sonuc sayfasini ayristir)
 local function ytSearchFirst(query, cb)
     local u = 'https://www.youtube.com/results?search_query=' .. urlencode(query)
-    PerformHttpRequest(u, function(code, body)
+    httpGet(u, { ['User-Agent'] = 'Mozilla/5.0', ['Accept-Language'] = 'tr,en' }, function(code, body)
         if code == 200 and body then
             cb(body:match('"videoId":"([%w_%-]+)"'))
         else
             cb(nil)
         end
-    end, 'GET', '', { ['User-Agent'] = 'Mozilla/5.0', ['Accept-Language'] = 'tr,en' })
+    end)
 end
 
 -- aractan inince muzigi otomatik durdur (bekci)
@@ -283,7 +294,7 @@ RegisterNUICallback('musicPlay', function(data, cb)
         cb({ ok = true })
         if not spfId(url) then SendNUIMessage({ action = 'musicError', msg = 'Gecersiz Spotify linki' }); return end
         local oe = 'https://open.spotify.com/oembed?url=' .. urlencode(url)
-        PerformHttpRequest(oe, function(code, body)
+        httpGet(oe, {}, function(code, body)
             local title, art
             if code == 200 and body then
                 local okj, d = pcall(json.decode, body)
@@ -295,7 +306,7 @@ RegisterNUICallback('musicPlay', function(data, cb)
                 if not vid then SendNUIMessage({ action = 'musicError', msg = '"' .. title .. '" bulunamadi' }); return end
                 playResolved(vid, 'https://www.youtube.com/watch?v=' .. vid, title, art, 'Spotify')
             end)
-        end, 'GET')
+        end)
         return
     end
 
@@ -306,7 +317,7 @@ RegisterNUICallback('musicPlay', function(data, cb)
     playResolved(vid, url, 'YouTube', thumb, '')
 
     local oe = 'https://www.youtube.com/oembed?format=json&url=' .. urlencode(url)
-    PerformHttpRequest(oe, function(code, body)
+    httpGet(oe, {}, function(code, body)
         if code == 200 and body then
             local okj, d = pcall(json.decode, body)
             if okj and d and d.title then
@@ -314,7 +325,7 @@ RegisterNUICallback('musicPlay', function(data, cb)
                     author = d.author_name or '', thumb = d.thumbnail_url or thumb })
             end
         end
-    end, 'GET')
+    end)
 
     cb({ ok = true })
 end)

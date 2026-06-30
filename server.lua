@@ -5,6 +5,8 @@
 --  aracin yaninda olmali + cooldown + URL dogrulama.
 -- ============================================================
 
+local QBCore = exports['qb-core']:GetCoreObject()
+
 local cooldown = {}
 
 -- gonderen, hedef aracin yaninda mi?
@@ -55,4 +57,36 @@ end)
 
 AddEventHandler('playerDropped', function()
     cooldown[source] = nil
+end)
+
+-- ============================================================
+--  HTTP GET proxy  (PerformHttpRequest YALNIZCA server'da calisir)
+--  GUVENLIK ("never trust the client"): yalnizca izinli hostlara izin
+--  ver — aksi halde client, server'a rastgele URL cektirebilir (SSRF).
+-- ============================================================
+local allowedHosts = {
+    ['www.youtube.com']  = true,
+    ['youtube.com']      = true,
+    ['m.youtube.com']    = true,
+    ['youtu.be']         = true,
+    ['open.spotify.com'] = true,
+}
+
+local function hostAllowed(url)
+    if type(url) ~= 'string' then return false end
+    local host = url:match('^https?://([^/]+)')
+    if not host then return false end
+    host = host:lower():gsub(':%d+$', '') -- olasi portu at
+    return allowedHosts[host] == true
+end
+
+QBCore.Functions.CreateCallback('qb-carplay:server:httpGet', function(_, cb, url, headers)
+    if not hostAllowed(url) then
+        cb({ code = 0 }) -- izinsiz host → bos don
+        return
+    end
+    local h = (type(headers) == 'table') and headers or {}
+    PerformHttpRequest(url, function(code, body)
+        cb({ code = code, body = body })
+    end, 'GET', '', h)
 end)
